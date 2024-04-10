@@ -11,10 +11,13 @@
 
 // I AM NOT DONE
 
+use std::convert::TryInto;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum DivisionError {
     NotDivisible(NotDivisibleError),
     DivideByZero,
+    Other(String),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -23,26 +26,54 @@ pub struct NotDivisibleError {
     divisor: i32,
 }
 
+impl NotDivisibleError {
+    pub fn new(dividend: i32, divisor: i32) -> Self {
+        Self { dividend, divisor }
+    }
+}
+
 // Calculate `a` divided by `b` if `a` is evenly divisible by `b`.
 // Otherwise, return a suitable error.
 pub fn divide(a: i32, b: i32) -> Result<i32, DivisionError> {
-    todo!();
+    if b == 0 {
+        return Err(DivisionError::DivideByZero);
+    }
+    match a % b {
+        remainder if remainder == 0 => Ok(a / b),
+        _ => Err(DivisionError::NotDivisible(NotDivisibleError::new(a, b))),
+    }
 }
 
 // Complete the function and return a value of the correct type so the test
 // passes.
 // Desired output: Ok([1, 11, 1426, 3])
-fn result_with_list() -> () {
+fn result_with_list() -> Result<[i32; 4], DivisionError> {
     let numbers = vec![27, 297, 38502, 81];
-    let division_results = numbers.into_iter().map(|n| divide(n, 27));
+    let division_results = numbers
+        .into_iter()
+        .map(|n| divide(n, 27).unwrap())
+        .collect::<Vec<_>>();
+    let result = division_results
+        .try_into()
+        .map_err(|_| DivisionError::Other("other transform error".to_string()))?;
+    Ok(result)
+
 }
 
 // Complete the function and return a value of the correct type so the test
 // passes.
 // Desired output: [Ok(1), Ok(11), Ok(1426), Ok(3)]
-fn list_of_results() -> () {
+fn list_of_results() -> [Result<i32, DivisionError>; 4] {
     let numbers = vec![27, 297, 38502, 81];
-    let division_results = numbers.into_iter().map(|n| divide(n, 27));
+    let division_results = numbers
+        .into_iter()
+        .map(|n| divide(n, 27))
+        .collect::<Vec<_>>();
+
+    let result = division_results
+        .try_into()
+        .unwrap();
+    result
 }
 
 #[cfg(test)]
@@ -74,7 +105,7 @@ mod tests {
     fn test_divide_0_by_something() {
         assert_eq!(divide(0, 81), Ok(0));
     }
-
+    //////////////////////////////////////////////////////////////////////////////////////////
     #[test]
     fn test_result_with_list() {
         assert_eq!(format!("{:?}", result_with_list()), "Ok([1, 11, 1426, 3])");
