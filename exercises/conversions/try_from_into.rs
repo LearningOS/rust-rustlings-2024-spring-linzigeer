@@ -27,8 +27,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
 // integers, an array of three integers, and a slice of integers.
@@ -41,6 +39,13 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (red, green, blue) = tuple;
+        let (check1, check2, check3) = check_rgb_range(red, green, blue);
+
+        match (check1, check2, check3) {
+            (true, true, true) => Ok(Color {red: red as _, green: green as _, blue: blue as _}),
+            _ => Err(IntoColorError::IntConversion),
+        }
     }
 }
 
@@ -48,6 +53,20 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        if arr.is_empty() || arr.len() !=3 {
+            return Err(IntoColorError::BadLen);
+        } else {
+            let red = arr[0];
+            let green = arr[1];
+            let blue = arr[2];
+
+            let (check1, check2, check3) = check_rgb_range(red, green, blue);
+
+            match (check1, check2, check3) {
+                (true, true, true) => Ok(Color {red: red as _, green: green as _, blue: blue as _}),
+                _ => Err(IntoColorError::IntConversion),
+            }
+        }
     }
 }
 
@@ -55,7 +74,28 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.is_empty() || slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        } else {
+            let red = slice[0];
+            let green = slice[1];
+            let blue = slice[2];
+
+            let (check1, check2, check3) = check_rgb_range(red, green, blue);
+
+            match (check1, check2, check3) {
+                (true, true, true) => Ok(Color {red: red as _, green: green as _, blue: blue as _}),
+                _ => Err(IntoColorError::IntConversion),
+            }
+        }
     }
+}
+
+fn check_rgb_range(red: i16, green:i16, blue:i16) -> (bool, bool, bool){
+    let check1 = u8::MIN as i16 <= red && red <= u8::MAX as i16;
+    let check2 = u8::MIN as i16 <= green && green <= u8::MAX as i16;
+    let check3 = u8::MIN as i16 <= blue && blue <= u8::MAX as i16;
+    (check1, check2, check3)
 }
 
 fn main() {

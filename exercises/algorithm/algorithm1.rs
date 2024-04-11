@@ -1,12 +1,10 @@
 /*
 	single linked list merge
-	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
+	This problem requires you to merge two ordered singly linked lists into one ordered
+	singly linked list
 */
-// I AM NOT DONE
-
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
 
 #[derive(Debug)]
 struct Node<T> {
@@ -69,15 +67,92 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+	// pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	// {
+	// 	//TODO
+	// 	Self {
+    //         length: 0,
+    //         start: list_a.start,
+    //         end: list_b.end,
+    //     }
+	// }
+
+    // pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+    //     where
+    //         T: PartialOrd,
+    // {
+    //     let mut merged_list = LinkedList::new();
+    //     let mut current_a = list_a.start;
+    //     let mut current_b = list_b.start;
+    //
+    //     while current_a.is_some() && current_b.is_some() {
+    //         let node_a = unsafe { current_a.unwrap().as_ref() };
+    //         let node_b = unsafe { current_b.unwrap().as_ref() };
+    //
+    //         if node_a.val <= node_b.val {
+    //             merged_list.add(node_a.val);
+    //             current_a = node_a.next;
+    //         } else {
+    //             merged_list.add(node_b.val);
+    //             current_b = node_b.next;
+    //         }
+    //     }
+    //
+    //     while current_a.is_some() {
+    //         let node_a = unsafe { current_a.unwrap().as_ref() };
+    //         merged_list.add(node_a.val);
+    //         current_a = node_a.next;
+    //     }
+    //
+    //     while current_b.is_some() {
+    //         let node_b = unsafe { current_b.unwrap().as_ref() };
+    //         merged_list.add(node_b.val);
+    //         current_b = node_b.next;
+    //     }
+    //
+    //     merged_list
+    // }
+
+    pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self
+        where
+            T: PartialOrd + Copy,
+    {
+        let mut merged_list = LinkedList::new();
+
+        // Temporary pointers for traversing the lists
+        let mut current_a = list_a.start;
+        let mut current_b = list_b.start;
+
+        while let (Some(a), Some(b)) = (current_a, current_b) {
+            let a_val = unsafe { &(*a.as_ptr()).val };
+            let b_val = unsafe { &(*b.as_ptr()).val };
+
+            if a_val <= b_val {
+                merged_list.add(*a_val);
+                current_a = unsafe { (*a.as_ptr()).next };
+            } else {
+                merged_list.add(*b_val);
+                current_b = unsafe { (*b.as_ptr()).next };
+            }
         }
-	}
+
+        // Append remaining elements of list_a or list_b
+        while let Some(a) = current_a {
+            let a_val = unsafe { &(*a.as_ptr()).val };
+            merged_list.add(*a_val);
+            current_a = unsafe { (*a.as_ptr()).next };
+        }
+
+        while let Some(b) = current_b {
+            let b_val = unsafe { &(*b.as_ptr()).val };
+            merged_list.add(*b_val);
+            current_b = unsafe { (*b.as_ptr()).next };
+        }
+
+        merged_list
+    }
+
+
 }
 
 impl<T> Display for LinkedList<T>
@@ -142,9 +217,9 @@ mod tests {
 		for i in 0..vec_b.len(){
 			list_b.add(vec_b[i]);
 		}
-		println!("list a {} list b {}", list_a,list_b);
+		println!("list a: {} list b: {}", list_a,list_b);
 		let mut list_c = LinkedList::<i32>::merge(list_a,list_b);
-		println!("merged List is {}", list_c);
+		println!("merged List is: {}", list_c);
 		for i in 0..target_vec.len(){
 			assert_eq!(target_vec[i],*list_c.get(i as i32).unwrap());
 		}
