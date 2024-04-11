@@ -7,6 +7,8 @@
 // Execute `rustlings hint from_into` or use the `hint` watch subcommand for a
 // hint.
 
+use std::num::ParseIntError;
+
 #[derive(Debug)]
 struct Person {
     name: String,
@@ -25,9 +27,9 @@ impl Default for Person {
 }
 
 // Your task is to complete this implementation in order for the line `let p =
-// Person::from("Mark,20")` to compile Please note that you'll need to parse the
+// Person::from("Mark,20")` to compile. Please note that you'll need to parse the
 // age component into a `usize` with something like `"4".parse::<usize>()`. The
-// outcome of this needs to be handled appropriately.
+// outcome of these needs to be handled appropriately.
 //
 // Steps:
 // 1. If the length of the provided string is 0, then return the default of
@@ -40,10 +42,31 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of
 // Person Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
-
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        return if s.is_empty() {
+            Person::default()
+        } else {
+            let split_result = s
+                .split(",")
+                .map(|element| element.to_string())
+                .collect::<Vec<String>>();
+            if split_result.is_empty() || split_result.len() != 2 {
+                Person::default()
+            } else {
+                match split_result[1].parse::<usize>() {
+                    Ok(age) => {
+                        let name = split_result[0].to_owned();
+                        if name.is_empty() {
+                            Person::default()
+                        } else {
+                            Person { age, name }
+                        }
+                    }
+                    Err(_) => Person::default(),
+                }
+            }
+        }
     }
 }
 
